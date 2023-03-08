@@ -26,9 +26,78 @@
   </div>
 
 <script>
-  const addItems = document.querySelector('.add-items');
-  const itemsList = document.querySelector('.plates');
-  const items = [];
+  // Get references to the form, items list, and items array
+const addItems = document.querySelector('.add-items');
+const itemsList = document.querySelector('.plates');
+let items = [];
+
+// Check if there are any items in local storage and load them into the items array
+if (localStorage.getItem('items')) {
+  items = JSON.parse(localStorage.getItem('items'));
+}
+
+// Add an event listener to the form to handle item submissions
+addItems.addEventListener('submit', addItem);
+
+// Define the addItem function
+function addItem(event) {
+  // Prevent the default form submission behavior
+  event.preventDefault();
+  
+  // Get the value of the item input field and create a new object to store the item and its status
+  const text = this.querySelector('[name=item]').value;
+  const item = {
+    text: text,
+    done: false
+  };
+  
+  // Add the new item to the items array and update local storage
+  items.push(item);
+  localStorage.setItem('items', JSON.stringify(items));
+  
+  // Reset the form input field
+  this.reset();
+  
+  // Call the displayItems function to update the items list on the page
+  displayItems();
+}
+
+// Define the displayItems function
+function displayItems() {
+  // Map over the items array and generate the HTML for each item in the list
+  const html = items.map((item, i) => {
+    return `
+      <li>
+        <input type="checkbox" data-index="${i}" id="item${i}" ${item.done ? 'checked' : ''} />
+        <label for="item${i}">${item.text}</label>
+      </li>
+    `;
+  }).join('');
+  
+  // Update the items list on the page
+  itemsList.innerHTML = html;
+}
+
+// Add an event listener to the items list to handle checkbox clicks
+itemsList.addEventListener('click', toggleDone);
+
+// Define the toggleDone function
+function toggleDone(event) {
+  // Check if the clicked element is a checkbox
+  if (!event.target.matches('input[type="checkbox"]')) return;
+  
+  // Get the index of the clicked checkbox and update its status in the items array and local storage
+  const index = event.target.dataset.index;
+  items[index].done = !items[index].done;
+  localStorage.setItem('items', JSON.stringify(items));
+  
+  // Call the displayItems function to update the items list on the page
+  displayItems();
+}
+
+// Call the displayItems function to initialize the items list on the page
+displayItems();
+
 
 </script>
 
